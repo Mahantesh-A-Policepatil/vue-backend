@@ -11,23 +11,31 @@ class CrmUserController extends Controller
 {
     /**
      * Create a new controller instance.
+     *
+     * @param  CrmUserRepositoryInterface  $crmUserRepository
      */
-    public function __construct(
-        protected CrmUserRepositoryInterface $crmUserRepository
-    ) {}
+    public function __construct(protected CrmUserRepositoryInterface $crmUserRepository)
+    {
+        // constructor does not return anything
+    }
 
     /**
      * Display a listing of the resource.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function index()
+    public function index(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->crmUserRepository->getAll();
     }
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\Response
     {
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -44,16 +52,23 @@ class CrmUserController extends Controller
 
     /**
      * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \App\Models\CrmUser
      */
-    public function show($id)
+    public function show(int $id): \App\Models\CrmUser
     {
         return $this->crmUserRepository->getById($id);
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): \Illuminate\Http\Response
     {
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -70,8 +85,11 @@ class CrmUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(int $id): \Illuminate\Http\Response
     {
         $this->crmUserRepository->delete($id);
 

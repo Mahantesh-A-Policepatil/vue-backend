@@ -1,0 +1,16 @@
+/* Global layout helpers so SPA fits the viewport and footer stays visible */
+html, body, #app {
+	height: 100%;
+}
+
+/* Ensure the Vue root fills viewport and flex children can size correctly */
+#app > * {
+	min-height: 0;
+}
+
+/* Small body reset to avoid unexpected vertical scrollbars */
+body {
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}

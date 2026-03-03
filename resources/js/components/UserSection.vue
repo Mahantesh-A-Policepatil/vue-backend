@@ -145,9 +145,9 @@ function saveUser(userData) {
     <div class="controls-section mb-4">
       <div class="row g-3 mb-3">
         <!-- Add User Button -->
-        <div class="col-12 d-flex justify-content-between align-items-center">
-          <h4 class="mb-0 fw-bold">👥 User Management</h4>
-          <button class="btn btn-success btn-lg px-4" @click="openCreate">
+          <div class="col-12 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">👥 User Management</h5>
+          <button class="btn btn-success btn-sm px-3" @click="openCreate">
             ➕ Add User
           </button>
         </div>
@@ -157,13 +157,13 @@ function saveUser(userData) {
         <!-- Search -->
         <div class="col-md-4">
           <label class="form-label fw-bold text-muted">🔍 Search</label>
-          <input v-model="search" class="form-control form-control-lg" placeholder="Search users..." />
+          <input v-model="search" class="form-control" placeholder="Search users..." />
         </div>
 
         <!-- Filter Type -->
         <div class="col-md-4">
           <label class="form-label fw-bold text-muted">Filter By</label>
-          <select v-model="filterType" class="form-select form-select-lg">
+          <select v-model="filterType" class="form-select">
             <option value="">Select Filter Type</option>
             <option value="department">Department</option>
             <option value="city">City</option>
@@ -173,7 +173,7 @@ function saveUser(userData) {
         <!-- Filter Value -->
         <div class="col-md-4">
           <label class="form-label fw-bold text-muted">Select Value</label>
-          <select v-model="filterValue" class="form-select form-select-lg" :disabled="!filterType">
+          <select v-model="filterValue" class="form-select" :disabled="!filterType">
             <option value="">Select Value</option>
             <option v-for="option in filterOptions" :key="option" :value="option">
               {{ option }}
@@ -184,7 +184,14 @@ function saveUser(userData) {
     </div>
 
     <!-- ================= TABLE ================= -->
-    <UserTable :users="paginatedUsers" @deleteUser="deleteUser" @editUser="openEdit" />
+    <UserTable
+      :users="paginatedUsers"
+      :sortKey="sortKey"
+      :sortOrder="sortOrder"
+      @sort="sortBy"
+      @deleteUser="deleteUser"
+      @editUser="openEdit"
+    />
 
     <!-- ================= PAGINATION ================= -->
     <nav class="mt-4" v-if="totalPages > 1">
@@ -216,32 +223,36 @@ function saveUser(userData) {
 <style scoped>
 .controls-section {
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  border-radius: 0.6rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 }
 
 .form-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #666;
 }
 
 .form-control,
 .form-select {
-  border-radius: 0.5rem;
-  border: 2px solid #e0e0e0;
-  transition: all 0.3s ease;
+  border-radius: 0.4rem;
+  border: 1.5px solid #e0e0e0;
+  transition: all 0.2s ease;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.92rem;
 }
 
 .form-control:focus,
 .form-select:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.18);
 }
 
 .btn-success {
   background-color: #42b983;
   border-color: #42b983;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.6rem;
 }
 
 .btn-success:hover {
