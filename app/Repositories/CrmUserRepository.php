@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\CrmUser;
 use App\Repositories\Contracts\CrmUserRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class CrmUserRepository implements CrmUserRepositoryInterface
 {
@@ -86,4 +87,13 @@ class CrmUserRepository implements CrmUserRepositoryInterface
 
         return true;
     }
+
+    /**
+     * Add many users by calling the database stored procedure.
+     */
+    public function seedUsingProcedure(int $count): void
+    {
+        DB::statement('CALL seed_crm_users(?)', [$count]);
+    }
+
 }

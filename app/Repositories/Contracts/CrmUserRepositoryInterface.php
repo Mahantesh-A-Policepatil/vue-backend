@@ -28,4 +28,11 @@ interface CrmUserRepositoryInterface
      * Delete a user.
      */
     public function delete($id);
+
+    /**
+    * Add many users by calling the database stored procedure.
+    */
+    public function seedUsingProcedure(int $count): void;
+
+
 }
