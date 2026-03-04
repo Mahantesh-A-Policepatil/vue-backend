@@ -2,19 +2,26 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import UserTable from './UserTable.vue'
 import UserForm from './UserForm.vue'
-import userService from '../services/userService.js'  // API client
+import userService from '../services/userService.js' // API client
 
 /* ---------------- FILTER STATE ---------------- */
 const filterType = ref('')
 const filterValue = ref('')
-const search = ref('')
+const searchInput = ref('')
+const appliedSearch = ref('')
 
 /* ---------------- USERS DATA ---------------- */
 const users = ref([])
 
 // helper for loading from backend
 function loadUsers() {
-  userService.getUsers()
+  userService.getUsers({
+    search: appliedSearch.value || undefined,
+    filter_type: filterType.value || undefined,
+    filter_value: filterValue.value || undefined,
+    sort_by: sortKey.value || undefined,
+    sort_order: sortOrder.value,
+  })
     .then(res => {
       users.value = res.data
     })
@@ -23,8 +30,21 @@ function loadUsers() {
     })
 }
 
+function applySearch() {
+  appliedSearch.value = searchInput.value.trim()
+  currentPage.value = 1
+  loadUsers()
+}
+
+function clearSearch() {
+  searchInput.value = ''
+  appliedSearch.value = ''
+  currentPage.value = 1
+  loadUsers()
+}
+
 // run initial load
-onMounted(loadUsers);
+onMounted(loadUsers)
 
 /* ---------------- SORT ---------------- */
 const sortKey = ref('')
@@ -37,8 +57,9 @@ function sortBy(column) {
     sortKey.value = column
     sortOrder.value = 'asc'
   }
-}
 
+  loadUsers()
+}
 
 /* ---------------- PAGINATION ---------------- */
 const currentPage = ref(1)
@@ -54,58 +75,24 @@ const filterOptions = computed(() => {
   return [...new Set(users.value.map(user => user[filterType.value]))]
 })
 
-/* ---------------- FILTER + SEARCH ---------------- */
-const filteredUsers = computed(() => {
-  const keyword = search.value.toLowerCase()
-
-  return users.value.filter(user => {
-
-    // Global Search
-    const matchesSearch = Object.values(user).some(value =>
-      value.toString().toLowerCase().includes(keyword)
-    )
-
-    // Dropdown Filter
-    const matchesFilter =
-      !filterType.value ||
-      !filterValue.value ||
-      user[filterType.value] === filterValue.value
-
-    return matchesSearch && matchesFilter
-  })
+/* Reset page and reload when filter controls change */
+watch([filterType, filterValue], () => {
+  currentPage.value = 1
+  loadUsers()
 })
 
-/* Reset page when search/filter changes */
-watch([search, filterType, filterValue], () => {
-  currentPage.value = 1
+watch(filterType, () => {
+  filterValue.value = ''
 })
 
 /* ---------------- PAGINATION LOGIC ---------------- */
 const totalPages = computed(() =>
-  Math.ceil(filteredUsers.value.length / perPage)
+  Math.ceil(users.value.length / perPage)
 )
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * perPage
-  return sortedUsers.value.slice(start, start + perPage)
-})
-
-const sortedUsers = computed(() => {
-  if (!sortKey.value) return filteredUsers.value
-
-  return [...filteredUsers.value].sort((a, b) => {
-    let valueA = a[sortKey.value]
-    let valueB = b[sortKey.value]
-
-    if (typeof valueA === 'string') {
-      valueA = valueA.toLowerCase()
-      valueB = valueB.toLowerCase()
-    }
-
-    if (valueA < valueB) return sortOrder.value === 'asc' ? -1 : 1
-    if (valueA > valueB) return sortOrder.value === 'asc' ? 1 : -1
-    return 0
-  })
+  return users.value.slice(start, start + perPage)
 })
 
 /* ---------------- CRUD ---------------- */
@@ -145,7 +132,7 @@ function saveUser(userData) {
     <div class="controls-section mb-4">
       <div class="row g-3 mb-3">
         <!-- Add User Button -->
-          <div class="col-12 d-flex justify-content-between align-items-center">
+        <div class="col-12 d-flex justify-content-between align-items-center">
           <h5 class="mb-0 fw-bold">👥 User Management</h5>
           <button class="btn btn-success btn-sm px-3" @click="openCreate">
             ➕ Add User
@@ -157,7 +144,28 @@ function saveUser(userData) {
         <!-- Search -->
         <div class="col-md-4">
           <label class="form-label fw-bold text-muted">🔍 Search</label>
-          <input v-model="search" class="form-control" placeholder="Search users..." />
+          <div class="search-group">
+            <div class="search-input-wrapper">
+              <input
+                v-model="searchInput"
+                class="form-control search-input"
+                placeholder="Search users..."
+                @keyup.enter="applySearch"
+              />
+              <button
+                v-if="searchInput"
+                type="button"
+                class="clear-search-btn"
+                @click="clearSearch"
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            </div>
+            <button type="button" class="btn btn-primary search-btn" @click="applySearch">
+              Search
+            </button>
+          </div>
         </div>
 
         <!-- Filter Type -->
@@ -246,6 +254,41 @@ function saveUser(userData) {
 .form-select:focus {
   border-color: #667eea;
   box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.18);
+}
+
+.search-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-input {
+  padding-right: 2rem;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #888;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.clear-search-btn:hover {
+  color: #333;
+}
+
+.search-btn {
+  white-space: nowrap;
 }
 
 .btn-success {

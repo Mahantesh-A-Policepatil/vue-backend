@@ -7,7 +7,7 @@ interface CrmUserRepositoryInterface
     /**
      * Get all users ordered by ID.
      */
-    public function getAll();
+    public function getAll(array $filters = []);
 
     /**
      * Get a user by ID.

@@ -10,9 +10,43 @@ class CrmUserRepository implements CrmUserRepositoryInterface
     /**
      * Get all users ordered by ID.
      */
-    public function getAll()
+    public function getAll(array $filters = [])
     {
-        return CrmUser::orderBy('id')->get();
+        $allowedSortColumns = ['id', 'first_name', 'last_name', 'age', 'department', 'city', 'created_at'];
+
+        $search = $filters['search'] ?? null;
+        $filterType = $filters['filter_type'] ?? null;
+        $filterValue = $filters['filter_value'] ?? null;
+        $sortBy = $filters['sort_by'] ?? 'id';
+        $sortOrder = $filters['sort_order'] ?? 'asc';
+
+        if (! in_array($sortBy, $allowedSortColumns, true)) {
+            $sortBy = 'id';
+        }
+
+        if (! in_array($sortOrder, ['asc', 'desc'], true)) {
+            $sortOrder = 'asc';
+        }
+
+        return CrmUser::query()
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('department', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('age', 'like', "%{$search}%");
+                });
+            })
+            ->when($filterType && $filterValue, function ($query) use ($filterType, $filterValue) {
+                $allowedFilterColumns = ['department', 'city'];
+
+                if (in_array($filterType, $allowedFilterColumns, true)) {
+                    $query->where($filterType, $filterValue);
+                }
+            })
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
     }
 
     /**
