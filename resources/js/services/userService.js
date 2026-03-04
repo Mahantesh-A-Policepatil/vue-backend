@@ -32,8 +32,8 @@ function toCamel(obj) {
 }
 
 export default {
-  getUsers() {
-    return apiClient.get('/users').then((res) => {
+  getUsers(params = {}) {
+    return apiClient.get('/users', { params }).then((res) => {
       res.data = res.data.map(toCamel)
       return res
     })

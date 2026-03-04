@@ -24,9 +24,17 @@ class CrmUserController extends Controller
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function index(): \Illuminate\Database\Eloquent\Collection
+    public function index(Request $request): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->crmUserRepository->getAll();
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'filter_type' => 'nullable|string|in:department,city',
+            'filter_value' => 'nullable|string|max:255',
+            'sort_by' => 'nullable|string|in:id,first_name,last_name,age,department,city,created_at',
+            'sort_order' => 'nullable|string|in:asc,desc',
+        ]);
+
+        return $this->crmUserRepository->getAll($validated);
     }
 
     /**
